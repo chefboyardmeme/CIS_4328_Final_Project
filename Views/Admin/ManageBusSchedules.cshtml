@@ -1,0 +1,93 @@
+﻿@model IEnumerable<UNFBusShuttle.Models.BusSchedule>
+@{
+    ViewBag.Title = "Manage Bus Schedules";
+}
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        // Global Variables
+
+        $(function() {
+
+            console.log("Ready!");
+
+            $('#busSchedules').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    'excel', 'pdf', 'print'
+                ]
+            });
+        });
+
+    </script>
+
+}
+
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Manage Bus Schedules</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Bus Schedules Details
+                    <a id="addNewBusSchedule" class="btn btn-xs btn-success pull-right" href="@Url.Action("UpSertBusSchedule", "Admin")?id=0"
+                   title="Add New Bus Schedule"><i class="fas fa-plus"></i> Add Bus Schedule</a>
+                </div>
+                <div class="panel-body">
+                    <table id="busSchedules" class="table table-sm table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 35px; text-align: center;">Sr. #</th>                                
+                                <th>Bus Number</th>
+                                <th>Bus Name</th>
+                                <th>Schedule Title</th>
+                                <th>Description</th>                                
+                                <th style="width: 35px;"></th>
+                                <th style="width: 45px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                            int counter = 0;
+
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td style="text-align: center;">@(++counter)</td>
+                                    <td>@item.BusNumber</td>
+                                    <td>@item.BusName</td>
+                                    <td>@item.ScheduleTitle</td>
+                                    <td>@item.Description</td>
+                                    <td class="text-center">
+                                        <a class="btn btn-xs btn-info" href="@Url.Action("UpSertBusSchedule", "Admin")?id=@item.Id" title="Edit Bus Schedule Details">Edit</a>
+                                    </td>
+                                    <td class="text-center">
+                                        @using (Html.BeginForm("DeleteBusSchedule", "Admin", FormMethod.Post))
+                                        {
+                                            <input type="hidden" name="id" id="id" value="@item.Id" />
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="submit" class="btn btn-xs btn-danger" title="Delete Bus Schedule" value="Delete"
+                                                onclick="return confirm('Are you sure you want to Delete this Bus Schedule?');" />
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @*<div class="panel-footer">Panel Footer</div>*@
+        </div>
+
+
+    </div>
+</div>

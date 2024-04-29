@@ -1,0 +1,24 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Unauthorized</title>
+
+    <link href="~/css/bootstrap.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="bg-danger" style="padding: 15px; margin-top: 155px; text-align: center;">
+        <hgroup>
+            <h1>Unauthorized Access.</h1>
+            <h3>You are not Authorized to view this Page. <br /> Please contact with the System Administrator.</h3>
+        </hgroup>
+
+        @*<a href='@Url.Action("Index", "Home")' title="Go to Home Page">Go to Home</a>*@
+        <a href='@Url.Action("Login", "Account")' title="Go to Login Page">Go to Login</a>
+    </div>
+</body>
+</html>

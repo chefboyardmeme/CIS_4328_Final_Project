@@ -1,0 +1,83 @@
+﻿@model UNFBusShuttle.Models.BusSchedule
+@{
+    ViewBag.Title = "Add / Edit Bus Schedule Details";
+}
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        $(function() {
+
+            //
+
+        });
+
+    </script>
+
+}
+
+    @section styles {
+
+        <style type="text/css">
+
+            /**/
+
+        </style>
+
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Add  / Edit Bus Schedule Details</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    User Details
+                </div>
+                @using (Html.BeginForm("UpSertBusSchedule", "Admin", FormMethod.Post))
+                {
+                    <div class="panel-body">
+
+                        @Html.AntiForgeryToken()
+
+                        @Html.HiddenFor(model => model.Id)                        
+                        @Html.HiddenFor(model => model.DateAdded)
+                        @Html.HiddenFor(model => model.AddedBy)
+                        @Html.HiddenFor(model => model.DateUpdated)
+                        @Html.HiddenFor(model => model.UpdatedBy)
+                                    
+                        <div class="form-group">
+                            <label>Bus Number</label>
+                            @Html.EditorFor(model => model.BusNumber, new { htmlAttributes = new { @class = "form-control", required = "required" }})
+                        </div>
+
+                        <div class="form-group">
+                            <label>Bus Name</label>
+                            @Html.EditorFor(model => model.BusName, new { htmlAttributes = new { @class = "form-control", required = "required" }})
+                        </div>
+
+                        <div class="form-group">
+                            <label>Schedule Title</label>
+                            @Html.EditorFor(model => model.ScheduleTitle, new { htmlAttributes = new { @class = "form-control", required = "required" }})
+                        </div>
+                                                    
+                        <div class="form-group">
+                            <label>Description</label>
+                            @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" }})
+                        </div>                    
+                        
+                    </div>
+                    <div class="panel-footer">
+                        <button type="submit" class="btn btn-primary" title="Save Bus Schedule Details"> Save</button>
+                    </div>
+                }
+
+        </div>
+    </div>
+</div>

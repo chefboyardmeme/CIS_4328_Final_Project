@@ -1,0 +1,72 @@
+﻿@*Message View*@
+@if (ViewBag.Info != null)
+{
+    <div class="alert alert-info alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Info!</strong> @ViewBag.Info
+    </div>
+}
+else if (ViewBag.Success != null)
+{
+    <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Success!</strong> @ViewBag.Success
+    </div>
+}
+else if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Error!</strong> @ViewBag.Error
+    </div>
+}
+else if (ViewBag.Warning != null)
+{
+    <div class="alert alert-warning alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Warning!</strong> @ViewBag.Warning
+    </div>
+}
+else if (ViewBag.CriticalWarning != null)
+{
+    <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Warning!</strong> @ViewBag.CriticalWarning
+    </div>
+}
+
+@if (TempData["Info"] != null)
+{
+    <div class="alert alert-info alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Info!</strong> @TempData["Info"]
+    </div>
+}
+else if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Success!</strong> @TempData["Success"]
+    </div>
+}
+else if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Error!</strong> @TempData["Error"]
+    </div>
+}
+else if (TempData["Warning"] != null)
+{
+    <div class="alert alert-warning alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Warning!</strong> @TempData["Warning"]
+    </div>
+}
+else if (TempData["CriticalWarning"] != null)
+{
+    <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>Warning!</strong> @TempData["CriticalWarning"]
+    </div>
+}

@@ -1,0 +1,127 @@
+﻿@model UNFBusShuttle.Models.Driver
+@{
+    ViewBag.Title = "Add / Edit Driver Details";
+}
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        $(function() {
+
+            // Initialize Select2
+            $(".select2").select2({
+                //theme: "bootstrap4",
+                //selectOnClose: true
+                //closeOnSelect: false
+            });
+
+        });
+
+        //$('#User_Id').on('change', function () {
+           
+        //    var userId = $(this).select2('val');
+        //    if (userId == null || userId == '')
+        //        userId = 0;
+
+        //    console.log({ UserId: userId });
+        //    $('#UserId').val(userId);
+        //});
+
+    </script>
+
+}
+
+    @section styles {
+
+        <style type="text/css">
+
+            /**/
+
+        </style>
+
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Add  / Edit Driver Details</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    User Details
+                </div>
+                @using (Html.BeginForm("UpSertDriver", "Admin", FormMethod.Post))
+                {
+                    <div class="panel-body">
+
+                        @Html.AntiForgeryToken()
+
+                        @Html.HiddenFor(model => model.Id)                        
+                        @Html.HiddenFor(model => model.DateAdded)
+                        @Html.HiddenFor(model => model.AddedBy)
+                        @Html.HiddenFor(model => model.DateUpdated)
+                        @Html.HiddenFor(model => model.UpdatedBy)
+                       
+                        <div class="form-group">
+                            <label>User</label>
+                            <br>
+                            @Html.DropDownList("UserId", ViewBag.Users as SelectList, "SELECT USER", new { @class = "form-control select2", required = "required" })
+                        </div>
+
+                        <div class="form-group">
+                            <label>First Name</label>
+                            @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control", required = "required" }})
+                        </div>
+
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control", required = "required" }})
+                        </div>
+                            
+                        <div class="form-group">
+                            <label>Bus Number</label>
+                            @Html.EditorFor(model => model.BusNumber, new { htmlAttributes = new { @class = "form-control", required = "required" }})
+
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", required = "required", @type = "email" }})
+                        </div>                    
+
+                        <div class="form-group">
+                            <label>Is Active?</label>
+                             <select class="form-control" name="DriverStatus" id="DriverStatus">
+                                @if (Model != null && Model.IsActive == true)
+                                {
+                                    <option value="Active" selected>Active</option>
+                                }
+                                else
+                                {
+                                    <option value="Active">Active</option>
+                                }
+                            
+                                @if (Model != null && Model.IsActive == false)
+                                {
+                                     <option value="InActive" selected>InActive</option>
+                                }
+                                else
+                                {
+                                    <option value="InActive">InActive</option>
+                                }                                                                                               
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="panel-footer">
+                        <button type="submit" class="btn btn-primary" title="Save Driver Details"> Save</button>
+                    </div>
+                }
+
+        </div>
+    </div>
+</div>

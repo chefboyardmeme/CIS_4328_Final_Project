@@ -1,0 +1,115 @@
+﻿@model IEnumerable<UNFBusShuttle.Models.User>
+@{
+    ViewBag.Title = "Manage Users";
+}
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        // Global Variables
+
+        $(function() {
+
+            console.log("Ready!");
+
+            $('#users').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    'excel', 'pdf', 'print'
+                ]
+            });
+        });
+
+    </script>
+
+}
+
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Manage Users</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Users Details
+                    <a id="addNewUser" class="btn btn-xs btn-success pull-right" href="@Url.Action("UpSertUser", "Admin")?id=0"
+                        title="Add New User"><i class="fas fa-plus"></i> Add User</a>
+                </div>
+                <div class="panel-body">
+                    <table id="users" class="table table-sm table-bordered table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 35px; text-align: center;">Sr. #</th>
+                                <th>User Name</th>
+                                <th>User Id</th>
+                                <th>Email</th>
+                                <th style="width: 75px; text-align: center;">Is Admin?</th>
+                                <th>User Type</th>
+                                <th style="width: 75px; text-align: center;">Is Actve?</th>
+                                <th style="width: 35px;"></th>
+                                <th style="width: 45px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                            int counter = 0;
+
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td style="text-align: center;">@(++counter)</td>
+                                    <td>@item.UserName</td>
+                                    <td>@item.UserId</td>
+                                    <td>@item.Email</td>
+                                    <td style="text-align: center;">
+                                        @if (item.IsAdmin != null && item.IsAdmin.Value == true)
+                                        {
+                                            <span class="badge" style="background-color: #5cb85c;">Yes</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge" style="background-color: #777777;">No</span>
+                                        }
+                                    </td>
+                                    <td>@item.UserType</td>
+                                    <td style="text-align: center;">
+                                        @if (item.IsActive != null && item.IsActive.Value == true)
+                                        {
+                                            <span class="badge" style="background-color: #5cb85c;">Yes</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge" style="background-color: #777777;">No</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <a class="btn btn-xs btn-info" href="@Url.Action("UpSertUser", "Admin")?id=@item.Id" title="Edit User Details">Edit</a>
+                                    </td>
+                                    <td class="text-center">
+                                        @using (Html.BeginForm("DeleteUser", "Admin", FormMethod.Post))
+                                        {
+                                            <input type="hidden" name="id" id="id" value="@item.Id" />
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="submit" class="btn btn-xs btn-danger" title="Delete User" value="Delete"
+                                                onclick="return confirm('Are you sure you want to Delete this User?');" />
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @*<div class="panel-footer">Panel Footer</div>*@
+        </div>
+
+
+    </div>
+</div>

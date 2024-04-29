@@ -1,0 +1,581 @@
+﻿@using Microsoft.AspNetCore.Http;
+@{
+    ViewBag.Title = "Home Page";
+    //
+    var busSchedules = ViewBag.BusSchedules as List<UNFBusShuttle.Models.BusSchedule>;
+
+    List<UNFBusShuttle.Models.BusSchedule> busA = null;
+    if (busSchedules != null)
+    {
+        busA = busSchedules.Where(x => x.BusNumber == 1).ToList();
+    }
+
+    List<UNFBusShuttle.Models.BusSchedule> busB = null;
+    if (busSchedules != null)
+    {
+        busB = busSchedules.Where(x => x.BusNumber == 2).ToList();
+    }
+
+    List<UNFBusShuttle.Models.BusSchedule> busC = null;
+    if (busSchedules != null)
+    {
+        busC = busSchedules.Where(x => x.BusNumber == 3).ToList();
+    }
+
+}
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        // Global Variables
+        var drivers = [];
+        var riders = [];
+        var lat = 0;
+        var long = 0;
+        //
+        var requestedBusNo = 0;
+        var requestStatusCounter = 0;
+        //
+        var myInterval;
+
+        $(function() {
+
+            console.log("Ready!");
+
+            getLocation();
+            getDriversInfo();
+            //getRidersInfo();
+            //setTimeout(initMap, 1000);
+            //
+            myInterval = setInterval(getRiderRequestStatus, 30000);
+
+        });
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                x.innerHTML = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        function showPosition(position) {
+
+            lat = position.coords.latitude;
+            long = position.coords.longitude;
+            //
+            console.log("Default Latitude: " + lat + ", Longitude: " + long);
+            //
+            // Save Rider Information
+            saveRiderInfo(lat, long);
+        }
+
+        function showError(error) {
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("User denied the request for Geolocation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable.");
+                    break;
+                case error.TIMEOUT:
+                    alert("The request to get user location timed out.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("An unknown error occurred.");
+                    break;
+            }
+        }
+
+        function saveRiderInfo(lat, long) {
+            var baseURL = '@Url.Content("~/")';
+            //console.log("BaseURL: " + baseURL);
+
+            //var data = {
+            //    latitude: lat,
+            //    longitude: long,
+            //}
+            //console.log("Data: " + data);
+
+            // Post Rider's Location Values to the Database of the Current Rider.
+            $.ajax({
+                type: "POST",
+                url: baseURL + "Home/InsertRiderLocation",
+                //data: "{ latitude: '" + lat + "', longitude: '" + long + "' }",
+                //data: JSON.stringify(data),
+                data: {
+                    latitude: lat,
+                    longitude: long
+                },
+                contentType: "application/x-www-form-urlencoded", //"application/json; charset=utf-8",
+                dataType: "json",
+                success: function(response) {
+                    if (response != null && response == "success") {
+                        console.log("Rider Location details have been Saved in the Database Successfully.");
+                        //alert("Rider Location details have been Saved in the Database Successfully.");
+                    } else {
+                        console.log("An error has occurred. Please contact with the System Administrator.");
+                        alert("An error has occurred. Please contact with the System Administrator.");
+                    }
+                },
+                failure: function(response) {
+                    console.log(response.responseText);
+                    //alert(response.responseText);
+                },
+                error: function(response) {
+                    console.log(response.responseText);
+                    //alert(response.responseText)
+                }
+            });
+        }
+
+        function getDriversInfo() {
+            var baseURL = '@Url.Content("~/")';
+            //console.log("BaseURL: " + baseURL);
+
+            // Get Drivers Locations from the Database
+            $.ajax({
+                type: "POST",
+                url: baseURL + "Home/GetDriversLocation",
+                data: {},
+                contentType: "application/x-www-form-urlencoded", //"application/json; charset=utf-8",
+                dataType: "json",
+                success: function(response) {
+                    if (response != null) {
+
+                        console.log("Response: " + response);
+                        $.each(response, function() {
+                            drivers.push(this.toString());
+                        });
+                        //console.log("Drivers Array: " + drivers[0]);
+
+                    } else {
+                        console.log("An error has occurred. Please contact with the System Administrator.");
+                        alert("An error has occurred. Please contact with the System Administrator.");
+                    }
+                },
+                failure: function(response) {
+                    console.log(response.responseText);
+                    //alert(response.responseText);
+                },
+                error: function(response) {
+                    console.log(response.responseText);
+                    //alert(response.responseText)
+                }
+            }).done(function(data) {
+
+                getRidersInfo();
+                //setTimeout(initMap, 1000);
+
+            });
+        }
+
+        function getRidersInfo() {
+            var baseURL = '@Url.Content("~/")';
+            //console.log("BaseURL: " + baseURL);
+
+            // Get Riders Locations from the Database
+            $.ajax({
+                type: "POST",
+                url: baseURL + "Home/GetRidersLocation",
+                data: {},
+                contentType: "application/x-www-form-urlencoded", //"application/json; charset=utf-8",
+                dataType: "json",
+                success: function(response) {
+                    if (response != null) {
+
+                        console.log("Response: " + response);
+                        $.each(response, function() {
+                            riders.push(this.toString());
+                        });
+                        //console.log("Drivers Array: " + drivers[0]);
+
+                    } else {
+                        console.log("An error has occurred. Please contact with the System Administrator.");
+                        alert("An error has occurred. Please contact with the System Administrator.");
+                    }
+                },
+                failure: function(response) {
+                    console.log(response.responseText);
+                    //alert(response.responseText);
+                },
+                error: function(response) {
+                    console.log(response.responseText);
+                    //alert(response.responseText)
+                }
+            }).done(function(data) {
+
+                setTimeout(initMap, 1000);
+
+            });
+        }
+
+        function initMap() {
+            // Revert these 02 x Lines on PUBLISHING to the End-User!
+            //lat = 30.266528096705517;
+            //long = -81.50716166494011;
+
+            // Initialze MapBox Container
+            $("#mapBox").empty();
+            //
+            mapboxgl.accessToken = 'pk.eyJ1IjoiaGl0Ym95MCIsImEiOiJjbG8zZXJzcjQwZXNnMmltd3h5eGRxb2dlIn0.Lrq9DsAU_EB64E3AlDr0uQ';
+            //
+            const map = new mapboxgl.Map({
+                container: 'mapBox', // container ID
+                // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+                style: 'mapbox://styles/mapbox/streets-v12', // style URL
+                center: [long, lat], // starting position [lng, lat]
+                zoom: 8 // starting zoom
+            });
+
+            // Get Driver Locations List from the Database & Create a default Marker and add it to the map.
+            var counter = 0;
+            $.each(drivers, function() {
+                var latitutde = this.toString().split('$')[0];
+                var longitude = this.toString().split('$')[1];
+                var driverName = this.toString().split('$')[2];
+                //console.log({ Latitude: latitutde, Longitude: longitude });
+
+                // Create the Popup
+                const popup = new mapboxgl.Popup({ offset: 25 }).setText(
+                    driverName
+                );
+
+                // Create DOM element for the marker
+                const el = document.createElement('div');
+                el.id = 'marker' + counter;
+                el.style.backgroundImage = 'url(../img/bus.svg)';
+                el.style.backgroundSize = 'cover';
+                el.style.backgroundPosition = 'center';
+                el.style.width = '30px';
+                el.style.height = '30px';
+                el.style.cursor = 'pointer';
+
+                // Add Market to the Map
+                const marker = new mapboxgl.Marker(el)
+                    .setLngLat([longitude, latitutde])
+                    .setPopup(popup) // sets a popup on this marker
+                    .addTo(map);
+
+                // AddMouse Events
+                const markerDiv = marker.getElement();
+                markerDiv.addEventListener('mouseenter', () => marker.togglePopup());
+                markerDiv.addEventListener('mouseleave', () => marker.togglePopup());
+
+            });
+
+            // Get Riders Locations List from the Database & Create a default Marker and add it to the map.
+            var counter1 = 0;
+            $.each(riders, function() {
+                var latitutde = this.toString().split('$')[0];
+                var longitude = this.toString().split('$')[1];
+                //console.log({ Latitude: latitutde, Longitude: longitude });
+
+                // No - Popup
+
+                // no - Create DOM element for the marker
+
+                // Add Market to the Map
+                new mapboxgl.Marker()
+                    .setLngLat([longitude, latitutde])
+                    .addTo(map);
+
+                // No - Mouse Events
+
+            });
+
+            // Resize Map
+            map.on('load', function() {
+                map.resize();
+            });
+
+            // Increment Counters
+            counter++;
+            counter1++;
+
+        }
+
+        $("#btnRequest").on("click", function(e) {
+
+            var baseURL = '@Url.Content("~/")';
+            //console.log("BaseURL: " + baseURL);
+
+            if (confirm('Are you sure, you want to Request the Bus Driver to wait?')) {
+                //alert('Request Submitted to Driver Successfully');
+                var bus = $('#bus').val();
+                var waitTime = $('#waitTime').val();
+
+                // Post Rider's Request Details in the Database
+                $.ajax({
+                    type: "POST",
+                    url: baseURL + "Home/InsertRiderRequest",
+                    data: {
+                        busNumber: bus,
+                        waitTime: waitTime
+                    },
+                    contentType: "application/x-www-form-urlencoded", //"application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function(response) {
+                        if (response != null && response == "success") {
+
+                            requestedBusNo = bus;
+                            console.log("Requested Bus Number: " + requestedBusNo);
+
+                            console.log("Rider Request to the Selected Bus Driver has been Submitted Successfully.");
+                            alert("Rider Request to the Selected Bus Driver has been Submitted Successfully.");
+                        } else {
+                            console.log("An error has occurred. Please contact with the System Administrator.");
+                            alert("An error has occurred. Please contact with the System Administrator.");
+                        }
+                    },
+                    failure: function(response) {
+                        console.log(response.responseText);
+                        //alert(response.responseText);
+                    },
+                    error: function(response) {
+                        console.log(response.responseText);
+                        //alert(response.responseText)
+                    }
+                });
+
+            } else {
+                //alert('Thanks!');
+                // Do Nothing!
+            }
+
+        });
+
+        function getRiderRequestStatus() {
+
+            // Increment Request Status Counter
+            if (requestedBusNo > 0)
+                requestStatusCounter++;
+
+            // Stop the Loop after 02 Requests!
+            if (requestStatusCounter > 2) {
+
+                console.log("Request Status Loop Stopped!");
+                clearInterval(myInterval);
+                //
+                return;
+            }
+
+            var baseURL = '@Url.Content("~/")';
+            //console.log("BaseURL: " + baseURL);
+
+            console.log("Checking Rider Request Status! Request Status Counter: " + requestStatusCounter);
+
+            // Get Rider's Request Status from the Database (Most Recent Request)
+            $.ajax({
+                type: "POST",
+                url: baseURL + "Home/GetRiderRequestStatus",
+                data: {
+                    busNumber: requestedBusNo,
+                },
+                contentType: "application/x-www-form-urlencoded", //"application/json; charset=utf-8",
+                dataType: "json",
+                success: function(response) {
+
+                    console.log("Requested Bus Number: " + requestedBusNo);
+
+                    if (response != null) {
+
+                        console.log("Response: " + response.RequestStatus);
+                        if (response.ActionTaken == true) {
+
+                            if (response.RequestStatus == true) {
+                                console.log("Your Request Accepted by the Selected Bus Driver.");
+                                alert("Your Request Accepted by the Selected Bus Driver.");
+                            }
+                            else {
+                                console.log("Your Request Rejected by the Selected Bus Driver.");
+                                alert("Your Request Rejected by the Selected Bus Driver.");
+                            }
+
+                        }
+                        else {
+
+                            console.log("No Action taken yet, by the Selected Bus Driver on your Request.");
+                            alert("No Action taken yet, by the Selected Bus Driver on your Request.");
+
+                        }
+
+                    } else {
+
+                        if (requestedBusNo > 0) {
+                            console.log("No Action taken yet, by the Selected Bus Driver on your Request.");
+                            alert("No Action taken yet, by the Selected Bus Driver on your Request.");
+                        }
+
+                    }
+                },
+                failure: function(response) {
+                    console.log(response.responseText);
+                    //alert(response.responseText);
+                },
+                error: function(response) {
+                    console.log(response.responseText);
+                    //alert(response.responseText)
+                }
+            });
+        }
+
+    </script>
+
+}
+
+    <style type="text/css">
+
+        #marker {
+            background-image: url('../img/bus.svg');
+            background-size: cover;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .mapboxgl-popup {
+            min-width: 155px;
+        }
+
+    </style>
+
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <div id="mapBox" style="height: 455px; width: 100%;"></div>
+        </div>
+    </div>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="row" style="margin-top: 15px;">
+            <div class="col-md-12">
+                <div class="form-inline">
+                    <div class="form-group">
+                        <label>Select Bus</label>
+                        <select id="bus" name="bus" class="form-control" style="width: 155px;">
+                            <option value="1">Bus A</option>
+                            <option value="2">Bus B</option>
+                            <option value="3">Bus C</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-left: 15px;">
+                        <label>Wait Time</label>
+                        <select id="waitTime" name="waitTime" class="form-control" style="width: 155px;">
+                            <option value="30">30 Seconds</option>
+                            <option value="45">45 Seconds</option>
+                            <option value="60">60 Seconds</option>
+                        </select>
+                    </div>
+
+                    <input id="btnRequest" type="button" class="btn btn-primary" title="Request Bus Driver" value="Request Driver" style="margin-left: 15px;" />
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row text-center">
+        <h2>Bus Schedule</h2>
+        <div class="col-md-4 text-center">
+            <div class="card" style="border: 1px solid #000; background: #000; color: #fff;">
+                <div class="card-body" style="min-height: 375px; padding-top: 5px;">
+                    <span style="font-size: 11px;">Campus Bus Shuttle Schedule - Bus A (Bue Route): Monday to Friday:</span>
+
+                    @foreach (var item in busA)
+                    {
+                        <div style="font-size: 11px;">@item.ScheduleTitle</div>
+                    }
+
+                    @*<div style="font-size: 11px;">7:00 AM - Departure from Campus Center</div>
+                    <div style="font-size: 11px;">7:15 AM - Science Building</div>
+                    <div style="font-size: 11px;">7:30 AM - Arts and Humanities Building</div>
+                    <div style="font-size: 11px;">8:00 AM - Engineering Campus</div>
+                    <div style="font-size: 11px;">8:15 AM - Student Dormitories (East)</div>
+                    <div style="font-size: 11px;">8:30 AM - Student Dormitories (West)</div>
+                    <div style="font-size: 11px;">9:00 AM - Cafeteria</div>
+                    <div style="font-size: 11px;">9:15 AM - Library</div>
+                    <div style="font-size: 11px;">10:00 AM - Gymnasium</div>
+                    <div style="font-size: 11px;">10:15 AM - Recreation Field</div>
+                    <div style="font-size: 11px;">11:00 AM - Return to Campus Center</div>
+                    <div style="font-size: 11px;">1:00 PM - Departure from Campus Center</div>
+                    <div style="font-size: 11px;">1:15 PM - Science Building</div>
+                    <div style="font-size: 11px;">1:30 PM - Arts and Humanities Building</div>
+                    <div style="font-size: 11px;">2:00 PM - Engineering Complex</div>
+                    <div style="font-size: 11px;">2:15 PM - Student Dormitories (East)</div>
+                    <div style="font-size: 11px;">2:30 PM - Student Dormitories (West)</div>
+                    <div style="font-size: 11px;">3:00 PM - Cafeteria</div>
+                    <div style="font-size: 11px;">3:15 PM - Library</div>
+                    <div style="font-size: 11px;">4:00 PM - Gymnasium</div>
+                    <div style="font-size: 11px;">4:15 PM - Recreation Field</div>
+                    <div style="font-size: 11px;">5:00 PM - Return to Campus Center</div>*@
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="card" style="border: 1px solid #000; background: #000; color: #fff;">
+                <div class="card-body" style="min-height: 375px; padding-top: 5px;">
+                    <span style="font-size: 11px;">Campus Bus Shuttle Schedule - Bus B (Green Route): Monday to Friday:</span>
+
+                    @foreach (var item in busB)
+                    {
+                        <div style="font-size: 11px;">@item.ScheduleTitle</div>
+                    }
+
+                    @*<div style="font-size: 11px;">7:30 AM - Departure from Campus Center</div>
+                    <div style="font-size: 11px;">7:45 AM - Science Building</div>
+                    <div style="font-size: 11px;">8:00 AM - Arts and Humanities Building</div>
+                    <div style="font-size: 11px;">8:30 AM - Engineering Campus</div>
+                    <div style="font-size: 11px;">8:45 AM - Student Dormitories (East)</div>
+                    <div style="font-size: 11px;">9:00 AM - Student Dormitories (West)</div>
+                    <div style="font-size: 11px;">9:30 AM - Cafeteria</div>
+                    <div style="font-size: 11px;">9:45 AM - Library</div>
+                    <div style="font-size: 11px;">10:30 AM - Gymnasium</div>
+                    <div style="font-size: 11px;">10:45 AM - Recreation Field</div>
+                    <div style="font-size: 11px;">11:00 AM - Return to Campus Center</div>
+                    <div style="font-size: 11px;">1:30 PM - Departure from Campus Center</div>
+                    <div style="font-size: 11px;">1:45 PM - Science Building</div>
+                    <div style="font-size: 11px;">2:00 PM - Arts and Humanities Building</div>
+                    <div style="font-size: 11px;">2:30 PM - Engineering Complex</div>
+                    <div style="font-size: 11px;">2:45 PM - Student Dormitories (East)</div>
+                    <div style="font-size: 11px;">3:00 PM - Student Dormitories (West)</div>
+                    <div style="font-size: 11px;">3:30 PM - Cafeteria</div>
+                    <div style="font-size: 11px;">3:45 PM - Library</div>
+                    <div style="font-size: 11px;">4:30 PM - Gymnasium</div>
+                    <div style="font-size: 11px;">4:45 PM - Recreation Field</div>
+                    <div style="font-size: 11px;">5:00 PM - Return to Campus Center</div>*@
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="card" style="border: 1px solid #000; background: #000; color: #fff;">
+                <div class="card-body" style="min-height: 375px; padding-top: 5px;">
+                    <span style="font-size: 11px;">Campus Bus Shuttle Schedule - Bus C (Red Route): Sat and Sun:</span>
+
+                    @foreach (var item in busC)
+                    {
+                        <div style="font-size: 11px;">@item.ScheduleTitle</div>
+                    }
+
+                    @*<div style="font-size: 11px;">10:00 AM - Departure from Campus Center</div>
+                    <div style="font-size: 11px;">10:15 AM - Science Building</div>
+                    <div style="font-size: 11px;">10:30 AM - Arts and Humanities Building</div>
+                    <div style="font-size: 11px;">11:00 AM - Student Dormitories (East)</div>
+                    <div style="font-size: 11px;">11:15 AM - Student Dormitories (West)</div>
+                    <div style="font-size: 11px;">11:30 AM - Cafeteria</div>
+                    <div style="font-size: 11px;">12:00 PM - Library</div>
+                    <div style="font-size: 11px;">12:15 PM - Gymnasium</div>
+                    <div style="font-size: 11px;">12:30 PM - Recreation Field</div>
+                    <div style="font-size: 11px;">1:30 PM - Return to Campus Center</div>
+                    <div style="font-size: 11px;">3:30 PM - Departure from Campus Center</div>
+                    <div style="font-size: 11px;">3:45 PM - Science Building</div>
+                    <div style="font-size: 11px;">4:00 PM - Arts and Humanities Building</div>
+                    <div style="font-size: 11px;">4:30 PM - Student Dormitories (East)</div>
+                    <div style="font-size: 11px;">4:45 PM - Student Dormitories (West)</div>
+                    <div style="font-size: 11px;">5:00 PM - Return to Campus Center</div>*@
+                </div>
+            </div>
+        </div>
+    </div>
