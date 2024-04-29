@@ -1,5 +1,5 @@
-Deployed Application URL:
-Roles:
+Deployed Application URL: "https://ospreytransit.azurewebsites.net/"
+Role Logins:
   Driver:
   Admin
   Rider:
